@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0a0612">
+
+  <title>Phoenix Web - Thiết kế website 3D cho doanh nghiệp Việt</title>
+  <meta name="description" content="Phoenix Web thiết kế website giới thiệu, bán hàng, landing page và web app theo yêu cầu, với trải nghiệm 3D tương tác, tốc độ nhanh và bảo mật chặt chẽ. Gửi yêu cầu để nhận báo giá.">
+  <meta name="robots" content="index, follow">
+
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="vi_VN">
+  <meta property="og:site_name" content="Phoenix Web">
+  <meta property="og:title" content="Phoenix Web - Thiết kế website 3D cho doanh nghiệp Việt">
+  <meta property="og:description" content="Website giới thiệu, bán hàng, landing page và web app với trải nghiệm 3D tương tác. Gửi yêu cầu để nhận báo giá.">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Phoenix Web - Thiết kế website 3D cho doanh nghiệp Việt">
+  <meta name="twitter:description" content="Website giới thiệu, bán hàng, landing page và web app với trải nghiệm 3D tương tác.">
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/css/main.css">
+
+  <!-- Importmap nội tuyến: server thay __CSP_NONCE__ bằng nonce CSP của từng request. -->
+  <script type="importmap" nonce="__CSP_NONCE__">
+  {
+    "imports": {
+      "three": "/vendor/three/build/three.module.js",
+      "three/addons/": "/vendor/three/examples/jsm/",
+      "gsap": "/vendor/gsap/index.js",
+      "gsap/": "/vendor/gsap/"
+    }
+  }
+  </script>
+  <script type="module" src="/js/main.js"></script>
+
+  <noscript>
+    <style nonce="__CSP_NONCE__">
+      .loader, .intro, .rail, .cursor, .gl-canvas { display: none !important; }
+      .noscript { display: block !important; }
+    </style>
+  </noscript>
+</head>
+<body class="is-loading">
+  <a class="skip-link" href="#stage">Bỏ qua điều hướng, đến nội dung chính</a>
+
+  <div class="app" id="app" data-page="1">
+    <!-- Lớp 1: WebGL (một renderer dùng chung cho cả site) -->
+    <canvas class="gl-canvas" id="gl" aria-hidden="true"></canvas>
+
+    <!-- Lớp phụ: bản dự phòng CSS 3D khi trình duyệt không có WebGL (main.js tự dựng) -->
+    <div class="fallback" id="fallback" aria-hidden="true" hidden></div>
+
+    <!-- Lớp 2: nội dung HTML thật của từng cảnh (page*.js dựng vào đây) -->
+    <main class="stage" id="stage" tabindex="-1"></main>
+
+    <!-- Điều hướng 3D cố định: 4 điểm mốc -->
+    <nav class="rail" id="rail" aria-label="Điều hướng chính">
+      <ol class="rail__list">
+        <li class="rail__item">
+          <a class="rail__link" href="#/1" data-page="1">
+            <span class="rail__dot" aria-hidden="true"></span>
+            <span class="rail__label">Chào mừng</span>
+          </a>
+        </li>
+        <li class="rail__item">
+          <a class="rail__link" href="#/2" data-page="2">
+            <span class="rail__dot" aria-hidden="true"></span>
+            <span class="rail__label">Dịch vụ</span>
+          </a>
+        </li>
+        <li class="rail__item">
+          <a class="rail__link" href="#/3" data-page="3">
+            <span class="rail__dot" aria-hidden="true"></span>
+            <span class="rail__label">Đặt dịch vụ</span>
+          </a>
+        </li>
+        <li class="rail__item">
+          <a class="rail__link" href="#/4" data-page="4">
+            <span class="rail__dot" aria-hidden="true"></span>
+            <span class="rail__label">Về chúng tôi</span>
+          </a>
+        </li>
+      </ol>
+    </nav>
+
+    <button class="gyro-btn" id="gyro-btn" type="button" hidden>Bật hiệu ứng nghiêng theo thiết bị</button>
+
+    <!-- Màn chuyển cảnh và con trỏ tùy chỉnh -->
+    <div class="veil" id="veil" aria-hidden="true"></div>
+    <div class="cursor" id="cursor" aria-hidden="true">
+      <span class="cursor__ring"></span>
+      <span class="cursor__dot"></span>
+    </div>
+
+    <!-- Hiệu ứng mở đầu: chạy một lần mỗi phiên, có nút bỏ qua -->
+    <div class="intro" id="intro" role="region" aria-label="Hiệu ứng mở đầu" hidden>
+      <div class="intro__spark" id="intro-spark" aria-hidden="true"></div>
+      <p class="intro__brand">Phoenix</p>
+      <button class="btn btn--ghost intro__skip" id="intro-skip" type="button">Bỏ qua</button>
+    </div>
+
+    <!-- Màn hình loading với thanh tiến trình thật -->
+    <div class="loader" id="loader" role="status" aria-live="polite">
+      <p class="loader__brand">Phoenix</p>
+      <div class="loader__bar" role="progressbar" aria-label="Tiến trình tải" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="loader-bar">
+        <div class="loader__fill" id="loader-fill"></div>
+      </div>
+      <p class="loader__text" id="loader-text">Đang nhóm lửa...</p>
+      <div class="loader__error" id="loader-error" hidden>
+        <p id="loader-error-text">Không tải được trang. Vui lòng kiểm tra kết nối mạng rồi thử lại.</p>
+        <button class="btn btn--primary" id="loader-retry" type="button">Tải lại trang</button>
+      </div>
+    </div>
+
+    <!-- Thông báo đổi trang cho trình đọc màn hình -->
+    <p class="sr-only" id="live" aria-live="polite" role="status"></p>
+  </div>
+
+  <!-- Nội dung thay thế khi tắt JavaScript. THAY thông tin liên hệ bằng thông tin thật. -->
+  <noscript>
+    <div class="noscript">
+      <h1>Phoenix Web - Thiết kế website cao cấp</h1>
+      <p>Chúng tôi thiết kế website giới thiệu doanh nghiệp, website bán hàng, landing page, web app theo yêu cầu, giao diện 3D tương tác, tối ưu tốc độ, SEO cơ bản, hosting - tên miền - SSL, bảo trì và tích hợp chatbot AI.</p>
+      <p>Trang này cần JavaScript để hiển thị giao diện 3D và biểu mẫu đặt dịch vụ. Bạn có thể bật JavaScript hoặc liên hệ trực tiếp:</p>
+      <ul>
+        <li>Email: <a href="mailto:lienhe@ten-mien-cua-ban.vn">lienhe@ten-mien-cua-ban.vn</a></li>
+        <li>Điện thoại: <a href="tel:+84900000000">0900 000 000</a></li>
+      </ul>
+    </div>
+  </noscript>
+</body>
+</html>
